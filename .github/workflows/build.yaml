@@ -6,8 +6,11 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  NUGET_FEED: https://nuget.pkg.github.com/Itenium-Forge/index.json
+
 jobs:
-  build-test-pack:
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +23,20 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: 📦 Restore dependencies
+        env:
+          NUGET_FEED_USERNAME: ${{ secrets.NUGET_FEED_USERNAME }}
+          NUGET_FEED_PASSWORD: ${{ secrets.NUGET_FEED_PASSWORD }}
         run: |
           cd backend
+          dotnet nuget list source
+          dotnet nuget remove source itenium
+          dotnet nuget add source --username ${{ env.NUGET_FEED_USERNAME }} --password ${{ env.NUGET_FEED_PASSWORD }} --store-password-in-clear-text --name itenium "$NUGET_FEED"
           dotnet restore
 
       - name: 🛠️ Build
+        working-directory: ./backend
         run: dotnet build --no-restore --configuration Release
 
       - name: ✅ Run tests
+        working-directory: ./backend
         run: dotnet test --no-build --configuration Release --verbosity normal
