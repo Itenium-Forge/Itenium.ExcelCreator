@@ -1,6 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+ARG Nuget_CustomFeedUserName
+ARG Nuget_CustomFeedPassword
+
 # Copy files & build
 COPY *.sln .
 COPY nuget.config ./
