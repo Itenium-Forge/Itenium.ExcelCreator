@@ -9,4 +9,16 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Itenium.Forge.Controllers" Version="0.2.1" />
+    <PackageReference Include="Itenium.Forge.Logging" Version="0.2.1" />
+    <PackageReference Include="Itenium.Forge.Settings" Version="0.2.1" />
+    <PackageReference Include="Itenium.Forge.Swagger" Version="0.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Itenium.ExcelCreator.Client\Itenium.ExcelCreator.Client.csproj" />
+  </ItemGroup>
+
 </Project>

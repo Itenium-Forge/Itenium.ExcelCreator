@@ -1,17 +1,41 @@
-var builder = WebApplication.CreateBuilder(args);
+using Itenium.ExcelCreator.WebApi;
+using Itenium.Forge.Controllers;
+using Itenium.Forge.Logging;
+using Itenium.Forge.Settings;
+using Itenium.Forge.Swagger;
+using Serilog;
 
-// Add services to the container.
+Log.Logger = LoggingExtensions.CreateBootstrapLogger();
 
-builder.Services.AddControllers();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+    var settings = builder.AddForgeSettings<ExcelCreatorSettings>();
+    builder.AddForgeLogging();
 
-var app = builder.Build();
+    builder.AddForgeControllers();
+    builder.AddForgeSwagger();
 
-// Configure the HTTP request pipeline.
+    WebApplication app = builder.Build();
+    app.UseForgeLogging();
 
-app.UseHttpsRedirection();
+    // app.UseAuthorization();
 
-app.UseAuthorization();
+    app.UseForgeControllers();
+    //if (app.Environment.IsDevelopment())
+    app.UseForgeSwagger();
 
-app.MapControllers();
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("DOTNET_ENVIRONMENT: " + Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"));
+    logger.LogInformation("ASPNETCORE_ENVIRONMENT: " + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
 
-app.Run();
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}

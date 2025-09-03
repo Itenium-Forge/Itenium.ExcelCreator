@@ -1,0 +1,15 @@
+**/.dockerignore
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/*.*proj.user
+**/bin
+**/docker-compose*
+**/Dockerfile*
+**/obj
+LICENSE
+README.md
+.editorconfig
+.github
+Itenium.ExcelCreator.WebApi/logs

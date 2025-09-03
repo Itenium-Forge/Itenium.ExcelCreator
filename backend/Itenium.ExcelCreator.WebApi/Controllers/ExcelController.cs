@@ -1,22 +1,27 @@
+using ClosedXML.Excel;
+using Itenium.ExcelCreator.Client;
+using Itenium.ExcelCreator.WebApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Itenium.ExcelCreator.WebApi.Controllers
+namespace Itenium.ExcelCreator.WebApi.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class ExcelController : ControllerBase, IExcelService
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class ExcelController : ControllerBase
+    private readonly ILogger<ExcelController> _logger;
+
+    public ExcelController(ILogger<ExcelController> logger)
     {
-        private readonly ILogger<ExcelController> _logger;
+        _logger = logger;
+    }
 
-        public ExcelController(ILogger<ExcelController> logger)
-        {
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public string Get()
-        {
-            return "TheExcel";
-        }
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var wb = new XLWorkbook();
+        var ws = wb.AddWorksheet("Sheet1");
+        ws.FirstCell().SetValue(42);
+        return wb.Deliver("excelfile.xlsx");
     }
 }
