@@ -3,3 +3,4 @@ bin
 obj
 *.user
 Itenium.ExcelCreator.WebApi/logs
+.env

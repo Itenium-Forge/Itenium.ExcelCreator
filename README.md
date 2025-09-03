@@ -9,6 +9,9 @@ dotnet add package Itenium.ExcelCreator
 
 ## WebApi Deployment
 
+Configure `backend/nuget.config` or create `backend/.env` or set the
+`Nuget_CustomFeed*` environment variables.
+
 ```sh
 cd backend
 docker build -t itenium-excel-creator .

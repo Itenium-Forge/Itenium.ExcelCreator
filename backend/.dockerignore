@@ -13,3 +13,5 @@ README.md
 .editorconfig
 .github
 Itenium.ExcelCreator.WebApi/logs
+**/.env
+**/.env*
