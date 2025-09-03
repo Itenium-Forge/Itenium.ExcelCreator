@@ -1,0 +1,15 @@
+version: '3.8'
+name: itenium-excel-creator
+
+services:
+  app:
+    build:
+      context: ./backend
+      args:
+        - Nuget_CustomFeedUserName=${Nuget_CustomFeedUserName}
+        - Nuget_CustomFeedPassword=${Nuget_CustomFeedPassword}
+    environment:
+      - ASPNETCORE_URLS=http://*:5000
+      - DOTNET_ENVIRONMENT=Development
+    ports:
+      - 8080:5000
