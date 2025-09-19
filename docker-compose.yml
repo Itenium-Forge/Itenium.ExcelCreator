@@ -2,7 +2,7 @@ version: '3.8'
 name: itenium-excel-creator
 
 services:
-  app:
+  excel-creator:
     build:
       context: ./backend
       args:
@@ -11,5 +11,16 @@ services:
     environment:
       - ASPNETCORE_URLS=http://*:5000
       - DOTNET_ENVIRONMENT=Development
+    volumes:
+      - ${LOG_FOLDER}:/app/logs
     ports:
-      - 8080:5000
+      - 7600:5000
+    networks:
+      - excelnet
+      - monitoring_monitoring
+
+networks:
+  excelnet:
+    driver: bridge
+  monitoring_monitoring:
+    external: true
