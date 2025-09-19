@@ -10,7 +10,7 @@ Log.Logger = LoggingExtensions.CreateBootstrapLogger();
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    var settings = builder.AddForgeSettings<ExcelCreatorSettings>();
+    builder.AddForgeSettings<ExcelCreatorSettings>();
     builder.AddForgeLogging();
 
     builder.AddForgeControllers();
@@ -19,15 +19,8 @@ try
     WebApplication app = builder.Build();
     app.UseForgeLogging();
 
-    // app.UseAuthorization();
-
     app.UseForgeControllers();
-    //if (app.Environment.IsDevelopment())
     app.UseForgeSwagger();
-
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("DOTNET_ENVIRONMENT: " + Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"));
-    logger.LogInformation("ASPNETCORE_ENVIRONMENT: " + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
 
     app.Run();
 }
