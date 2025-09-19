@@ -1,7 +1,9 @@
+using System.Globalization;
 using ClosedXML.Excel;
 using Itenium.ExcelCreator.Client;
 using Itenium.ExcelCreator.WebApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Itenium.ExcelCreator.WebApi.Controllers;
 
@@ -57,22 +59,21 @@ public class ExcelController : ControllerBase, IExcelService
                 else
                 {
                     // Default formatting
-                    cell.Value = value?.ToString();
+                    cell.Value = GetStringValue(value);
                 }
             }
         }
 
-        // var lastColumn = Math.Max(, data.Data[0].Length);
-        var lastRow = data.Data.Length + 1; // +1 for header row
+        int lastRow = data.Data.Length + 1; // +1 for header row
         ws.Range(1, 1, lastRow, cols).SetAutoFilter();
 
         ws.ColumnsUsed().AdjustToContents();
         return wb.Deliver(data.Config.FileName);
     }
 
-    private static void FormatCellBasedOnType(IXLCell cell, object? value, ColumnType columnType)
+    private static void FormatCellBasedOnType(IXLCell cell, JsonElement value, ColumnType columnType)
     {
-        if (value == null)
+        if (value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
         {
             cell.Value = "";
             return;
@@ -81,43 +82,135 @@ public class ExcelController : ControllerBase, IExcelService
         switch (columnType)
         {
             case ColumnType.String:
-                cell.Value = value.ToString();
+                cell.Value = GetStringValue(value);
                 break;
 
             case ColumnType.Date:
-                if (DateTime.TryParse(value.ToString(), out DateTime dateValue))
+                if (TryGetDateValue(value, out DateTime dateValue))
                 {
                     cell.Value = dateValue;
                     cell.Style.DateFormat.Format = "mm/dd/yyyy";
                 }
                 else
                 {
-                    cell.Value = value.ToString();
+                    cell.Value = GetStringValue(value);
                 }
                 break;
 
             case ColumnType.Percentage:
-                if (double.TryParse(value.ToString(), out double percentValue))
+                if (TryGetDoubleValue(value, out double percentValue))
                 {
-                    // Assuming the value is already in percentage form (e.g., 25 for 25%)
                     cell.Value = percentValue / 100;
                     cell.Style.NumberFormat.Format = "0.00%";
                 }
                 else
                 {
-                    cell.Value = value.ToString();
+                    cell.Value = GetStringValue(value);
                 }
                 break;
 
+            case ColumnType.Integer:
+                if (TryGetIntegerValue(value, out int intValue))
+                {
+                    cell.Value = intValue;
+                    cell.Style.NumberFormat.Format = "#,##0";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Money:
+                if (TryGetDoubleValue(value, out double currencyValue))
+                {
+                    cell.Value = currencyValue;
+                    cell.Style.NumberFormat.Format = "€ #,##0.00";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Decimal:
+                if (TryGetDoubleValue(value, out double decimalValue))
+                {
+                    cell.Value = decimalValue;
+                    cell.Style.NumberFormat.Format = "#,##0.00";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Boolean:
+                cell.Value = value.ValueKind switch
+                {
+                    JsonValueKind.True => true,
+                    JsonValueKind.False => false,
+                    _ => GetStringValue(value)
+                };
+                break;
+
             default:
-                cell.Value = value.ToString();
+                cell.Value = GetStringValue(value);
                 break;
         }
     }
 
+    private static string GetStringValue(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => element.GetString() ?? "",
+            JsonValueKind.Number => element.GetDecimal().ToString(CultureInfo.InvariantCulture),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Null => "",
+            JsonValueKind.Undefined => "",
+            _ => element.ToString()
+        };
+    }
+
+    private static bool TryGetDoubleValue(JsonElement element, out double value)
+    {
+        value = 0;
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.Number => element.TryGetDouble(out value),
+            JsonValueKind.String => double.TryParse(element.GetString(), CultureInfo.InvariantCulture, out value),
+            _ => false
+        };
+    }
+
+    private static bool TryGetIntegerValue(JsonElement element, out int value)
+    {
+        value = 0;
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.Number => element.TryGetInt32(out value),
+            JsonValueKind.String => int.TryParse(element.GetString(), CultureInfo.InvariantCulture, out value),
+            _ => false
+        };
+    }
+
+    private static bool TryGetDateValue(JsonElement element, out DateTime value)
+    {
+        value = default;
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            return DateTime.TryParse(element.GetString(), out value);
+        }
+        return false;
+    }
+
     public class FullExcelData
     {
-        public object?[][] Data { get; set; } = [];
+        public JsonElement[][] Data { get; set; } = [];
         public ExcelConfiguration Config { get; set; } = new();
     }
 
@@ -139,7 +232,9 @@ public class ExcelController : ControllerBase, IExcelService
         String,
         Date,
         Percentage,
-        Number,
+        Integer,
         Money,
+        Decimal,
+        Boolean,
     }
 }
