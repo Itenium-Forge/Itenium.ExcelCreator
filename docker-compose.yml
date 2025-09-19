@@ -1,5 +1,4 @@
 version: '3.8'
-name: itenium-excel-creator
 
 services:
   excel-creator:
@@ -23,4 +22,4 @@ networks:
   excelnet:
     driver: bridge
   monitoring_monitoring:
-    external: true
+    external: ${LOGGING_NETWORK:-false}
