@@ -9,7 +9,7 @@ services:
         - Nuget_CustomFeedPassword=${Nuget_CustomFeedPassword}
     environment:
       - ASPNETCORE_URLS=http://*:5000
-      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_ENVIRONMENT=Release
     volumes:
       - ${LOG_FOLDER}:/app/logs
     ports:
