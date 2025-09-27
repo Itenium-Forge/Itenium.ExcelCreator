@@ -1,0 +1,205 @@
+using ClosedXML.Excel;
+using Itenium.ExcelCreator.Library.Models;
+using System.Globalization;
+using System.Text.Json;
+
+namespace Itenium.ExcelCreator.Library;
+
+public class ExcelService
+{
+    public XLWorkbook CreateExcel(FullExcelData data)
+    {
+        var wb = new XLWorkbook();
+        var ws = wb.AddWorksheet(data.Config.SheetName);
+
+        int cols = data.Config.Columns.Length;
+
+        if (data.Config.Columns.Length > 0)
+        {
+            for (int i = 0; i < data.Config.Columns.Length; i++)
+            {
+                var cell = ws.Cell(1, i + 1);
+                cell.Value = data.Config.Columns[i].Header;
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+            }
+        }
+
+        for (int rowIndex = 0; rowIndex < data.Data.Length; rowIndex++)
+        {
+            var row = data.Data[rowIndex];
+            for (int colIndex = 0; colIndex < row.Length; colIndex++)
+            {
+                var cell = ws.Cell(rowIndex + 2, colIndex + 1);
+                var value = row[colIndex];
+
+                // Apply formatting based on column type
+                if (colIndex < data.Config.Columns.Length)
+                {
+                    var columnConfig = data.Config.Columns[colIndex];
+                    FormatCellBasedOnType(cell, value, columnConfig.Type);
+                }
+                else
+                {
+                    // Default formatting
+                    cell.Value = GetStringValue(value);
+                }
+            }
+        }
+
+        int lastRow = data.Data.Length + 1;
+        ws.Range(1, 1, lastRow, cols).SetAutoFilter();
+
+        ws.ColumnsUsed().AdjustToContents();
+        return wb;
+    }
+
+    private static void FormatCellBasedOnType(IXLCell cell, JsonElement value, ColumnType columnType)
+    {
+        if (value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+        {
+            cell.Value = "";
+            return;
+        }
+
+        switch (columnType)
+        {
+            case ColumnType.String:
+                cell.Value = GetStringValue(value);
+                break;
+
+            case ColumnType.Date:
+                if (TryGetDateValue(value, out DateTime dateValue))
+                {
+                    cell.Value = dateValue;
+                    cell.Style.DateFormat.Format = "mm/dd/yyyy";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Percentage:
+                if (TryGetDecimalValue(value, out decimal percentValue))
+                {
+                    cell.Value = percentValue / 100;
+                    cell.Style.NumberFormat.Format = "0.00%";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Integer:
+                if (TryGetIntegerValue(value, out int intValue))
+                {
+                    cell.Value = intValue;
+                    cell.Style.NumberFormat.Format = "#,##0";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Money:
+                if (TryGetDecimalValue(value, out decimal currencyValue))
+                {
+                    cell.Value = currencyValue;
+                    cell.Style.NumberFormat.Format = "€ #,##0.00";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Decimal:
+                if (TryGetDecimalValue(value, out decimal decimalValue))
+                {
+                    cell.Value = decimalValue;
+                    cell.Style.NumberFormat.Format = "#,##0.00";
+                }
+                else
+                {
+                    cell.Value = GetStringValue(value);
+                }
+                break;
+
+            case ColumnType.Boolean:
+                cell.Value = value.ValueKind switch
+                {
+                    JsonValueKind.True => true,
+                    JsonValueKind.False => false,
+                    _ => GetStringValue(value)
+                };
+                break;
+
+            default:
+                cell.Value = GetStringValue(value);
+                break;
+        }
+    }
+
+    private static string GetStringValue(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => element.GetString() ?? "",
+            JsonValueKind.Number => element.GetDecimal().ToString(CultureInfo.InvariantCulture),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Null => "",
+            JsonValueKind.Undefined => "",
+            _ => element.ToString()
+        };
+    }
+
+    private static bool TryGetDoubleValue(JsonElement element, out double value)
+    {
+        value = 0;
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.Number => element.TryGetDouble(out value),
+            JsonValueKind.String => double.TryParse(element.GetString(), CultureInfo.InvariantCulture, out value),
+            _ => false
+        };
+    }
+
+    private static bool TryGetDecimalValue(JsonElement element, out decimal value)
+    {
+        value = 0;
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.Number => element.TryGetDecimal(out value),
+            JsonValueKind.String => decimal.TryParse(element.GetString(), CultureInfo.InvariantCulture, out value),
+            _ => false
+        };
+    }
+
+    private static bool TryGetIntegerValue(JsonElement element, out int value)
+    {
+        value = 0;
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.Number => element.TryGetInt32(out value),
+            JsonValueKind.String => int.TryParse(element.GetString(), CultureInfo.InvariantCulture, out value),
+            _ => false
+        };
+    }
+
+    private static bool TryGetDateValue(JsonElement element, out DateTime value)
+    {
+        value = default;
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            return DateTime.TryParse(element.GetString(), out value);
+        }
+        return false;
+    }
+}

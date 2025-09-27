@@ -1,3 +1,5 @@
+using Itenium.ExcelCreator.Library;
+
 namespace Itenium.ExcelCreator.Client;
 
 public class ExcelHttpClient : IExcelService

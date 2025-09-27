@@ -1,4 +1,4 @@
-namespace Itenium.ExcelCreator.Client;
+namespace Itenium.ExcelCreator.Library;
 
 public interface IExcelService
 {

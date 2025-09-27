@@ -11,14 +11,15 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="Itenium.Forge.Controllers" Version="0.2.1" />
-    <PackageReference Include="Itenium.Forge.Logging" Version="0.2.1" />
-    <PackageReference Include="Itenium.Forge.Settings" Version="0.2.1" />
-    <PackageReference Include="Itenium.Forge.Swagger" Version="0.2.1" />
+    <PackageReference Include="Itenium.Forge.Controllers" Version="0.2.2" />
+    <PackageReference Include="Itenium.Forge.Logging" Version="0.2.2" />
+    <PackageReference Include="Itenium.Forge.Settings" Version="0.2.2" />
+    <PackageReference Include="Itenium.Forge.Swagger" Version="0.2.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Itenium.ExcelCreator.Client\Itenium.ExcelCreator.Client.csproj" />
+    <ProjectReference Include="..\Itenium.ExcelCreator.Library\Itenium.ExcelCreator.Library.csproj" />
   </ItemGroup>
 
 </Project>

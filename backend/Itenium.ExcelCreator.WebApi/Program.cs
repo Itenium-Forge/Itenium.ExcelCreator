@@ -1,3 +1,5 @@
+using Itenium.ExcelCreator.Library;
+using Itenium.ExcelCreator.Library.Models;
 using Itenium.ExcelCreator.WebApi;
 using Itenium.Forge.Controllers;
 using Itenium.Forge.Logging;
@@ -14,7 +16,9 @@ try
     builder.AddForgeLogging();
 
     builder.AddForgeControllers();
-    builder.AddForgeSwagger();
+    builder.AddForgeSwagger(typeof(ColumnType));
+
+    builder.Services.AddScoped<ExcelService>();
 
     WebApplication app = builder.Build();
     app.UseForgeLogging();
