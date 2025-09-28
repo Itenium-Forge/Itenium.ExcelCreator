@@ -158,4 +158,53 @@ public class SheetTests
         double width = worksheet.Column(1).Width;
         Assert.That(width, Is.GreaterThan(15.0));
     }
+
+    [Test]
+    public void FreezesColumns_IsZero_WhenNotSet()
+    {
+        var data = new FullExcelData
+        {
+            Config = new ExcelConfiguration
+            {
+                Columns = [
+                    new() { Header = "Name", Type = ColumnType.String },
+                    new() { Header = "Age", Type = ColumnType.Integer },
+                    new() { Header = "Salary", Type = ColumnType.Money }
+                ],
+            },
+            Data = Helpers.CreateTestData([
+                ["John", 30, 50000]
+            ])
+        };
+
+        var workbook = _service.CreateExcel(data);
+        var worksheet = workbook.Worksheet(1);
+
+        Assert.That(worksheet.SheetView.SplitColumn, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void FreezesColumns()
+    {
+        var data = new FullExcelData
+        {
+            Config = new ExcelConfiguration
+            {
+                Columns = [
+                    new() { Header = "Name", Type = ColumnType.String },
+                    new() { Header = "Age", Type = ColumnType.Integer },
+                    new() { Header = "Salary", Type = ColumnType.Money }
+                ],
+                FreezeColumns = 2
+            },
+            Data = Helpers.CreateTestData([
+                ["John", 30, 50000]
+            ])
+        };
+
+        var workbook = _service.CreateExcel(data);
+        var worksheet = workbook.Worksheet(1);
+
+        Assert.That(worksheet.SheetView.SplitColumn, Is.EqualTo(2));
+    }
 }

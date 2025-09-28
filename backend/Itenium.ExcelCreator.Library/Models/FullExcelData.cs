@@ -18,6 +18,10 @@ public class ExcelConfiguration
 {
     public string FileName { get; set; } = "";
     public string SheetName { get; set; } = "Sheet1";
+    /// <summary>
+    /// The amount of columns to freeze.
+    /// </summary>
+    public int? FreezeColumns { get; set; }
     public ColumnConfiguration[] Columns { get; set; } = [];
 
     public override string ToString() => $"{SheetName}: {string.Join(", ", Columns.Select(x => x.Header))}";

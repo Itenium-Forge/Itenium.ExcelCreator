@@ -65,6 +65,11 @@ public class ExcelService
         int cols = data.Config.Columns.Length;
         ws.Range(1, 1, lastRow, cols).SetAutoFilter();
 
+        if (data.Config.FreezeColumns is > 0)
+        {
+            ws.SheetView.FreezeColumns(data.Config.FreezeColumns.Value);
+        }
+
         ws.ColumnsUsed().AdjustToContents();
         return wb;
     }
