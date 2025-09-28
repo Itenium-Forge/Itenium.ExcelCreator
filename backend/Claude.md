@@ -1,1 +1,5 @@
 - Do not add comments or explanations
+- Be very concise
+- Assume I am an expert programmer
+- Do not explain code unless I ask for it
+- If there are multiple ways of doing something, list the possibilities before generating any code
