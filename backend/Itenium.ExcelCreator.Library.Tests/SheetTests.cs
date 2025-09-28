@@ -26,7 +26,7 @@ public class SheetTests
 
         var workbook = _service.CreateExcel(data);
 
-        Assert.That(workbook.Worksheets.Count, Is.EqualTo(1));
+        Assert.That(workbook.Worksheets, Has.Count.EqualTo(1));
         Assert.That(workbook.Worksheet(1).Name, Is.EqualTo("TestSheet"));
     }
 

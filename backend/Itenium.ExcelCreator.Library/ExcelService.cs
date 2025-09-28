@@ -43,7 +43,7 @@ public class ExcelService
                         row[colIndex].ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined)
                     {
                         cell.Style.Fill.BackgroundColor = XLColor.Red;
-                        cell.CreateComment().AddText($"ERR: Both formula ({formula}) and data ({row[colIndex].ToString()})");
+                        cell.CreateComment().AddText($"ERR: Both formula ({formula}) and data ({row[colIndex]})");
                     }
                 }
                 else if (colIndex < row.Length)

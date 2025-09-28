@@ -7,7 +7,7 @@ namespace Itenium.ExcelCreator.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ExcelController(ExcelService service) : ControllerBase, IExcelService
+public class ExcelController(ExcelService service) : ControllerBase
 {
     /// <summary>
     /// Creates an Excel from the data and configuration posted in the body
