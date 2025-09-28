@@ -26,6 +26,12 @@ public class ColumnConfiguration
     /// </summary>
     public string Header { get; set; } = "";
     public ColumnType Type { get; set; }
+    /// <summary>
+    /// Can start with '='.
+    /// Use {row} to be replaced with the current row number.
+    /// Example: "=A{row}+B{row}".
+    /// </summary>
+    public string? Formula { get; set; }
 }
 
 /// <summary>
@@ -43,7 +49,8 @@ public enum ColumnType
     /// </summary>
     Date,
     /// <summary>
-    /// 0.00%
+    /// Value passed should be 0-100.
+    /// Formatting: 0.00%.
     /// </summary>
     Percentage,
     /// <summary>

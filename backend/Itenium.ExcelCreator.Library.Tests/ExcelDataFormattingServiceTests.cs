@@ -1,11 +1,9 @@
 using System.Globalization;
 using Itenium.ExcelCreator.Library.Models;
-using ClosedXML.Excel;
-using System.Text.Json;
 
 namespace Itenium.ExcelCreator.Library.Tests;
 
-public class ExcelServiceTests
+public class ExcelDataFormattingServiceTests
 {
     private ExcelService _service;
 
@@ -13,56 +11,6 @@ public class ExcelServiceTests
     public void Setup()
     {
         _service = new ExcelService();
-    }
-
-    [Test]
-    public void CreateExcel_WithBasicConfiguration_CreatesWorkbookWithCorrectSheetName()
-    {
-        var data = new FullExcelData
-        {
-            Config = new ExcelConfiguration
-            {
-                SheetName = "TestSheet",
-            },
-        };
-
-        var workbook = _service.CreateExcel(data);
-
-        Assert.That(workbook.Worksheets.Count, Is.EqualTo(1));
-        Assert.That(workbook.Worksheet(1).Name, Is.EqualTo("TestSheet"));
-    }
-
-    [Test]
-    public void CreateExcel_WithHeaders_CreatesCorrectHeaders()
-    {
-        var data = new FullExcelData
-        {
-            Config = new ExcelConfiguration
-            {
-                Columns = [
-                    new() { Header = "Name", Type = ColumnType.String },
-                    new() { Header = "Age", Type = ColumnType.Integer },
-                    new() { Header = "Salary", Type = ColumnType.Money }
-                ]
-            },
-            Data = CreateTestData([
-                ["John Doe", 30, 50000.50],
-                ["Jane Smith", 25, 60000.75]
-            ])
-        };
-
-        var workbook = _service.CreateExcel(data);
-        var worksheet = workbook.Worksheet(1);
-
-        Assert.That(worksheet.Cell(1, 1).Value.ToString(), Is.EqualTo("Name"));
-        Assert.That(worksheet.Cell(1, 2).Value.ToString(), Is.EqualTo("Age"));
-        Assert.That(worksheet.Cell(1, 3).Value.ToString(), Is.EqualTo("Salary"));
-        
-        Assert.That(worksheet.Cell(1, 1).Style.Font.Bold, Is.True);
-        Assert.That(worksheet.Cell(1, 1).Style.Fill.BackgroundColor, Is.EqualTo(XLColor.LightGray));
-
-        Assert.That(worksheet.Cell(2, 1).Style.Font.Bold, Is.False);
-        Assert.That(worksheet.Cell(2, 1).Style.Fill.BackgroundColor, Is.Not.EqualTo(XLColor.LightGray));
     }
 
     [Test]
@@ -76,7 +24,7 @@ public class ExcelServiceTests
                     new() { Header = "Name", Type = ColumnType.String }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 ["John Doe"],
                 ["Jane Smith"]
             ])
@@ -100,7 +48,7 @@ public class ExcelServiceTests
                     new() { Header = "Count", Type = ColumnType.Integer }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [1000],
                 [2500000]
             ])
@@ -126,7 +74,7 @@ public class ExcelServiceTests
                     new() { Header = "Salary", Type = ColumnType.Money }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [1250.75],
                 [95.2301]
             ])
@@ -152,7 +100,7 @@ public class ExcelServiceTests
                     new() { Header = "Salary", Type = ColumnType.Money }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [1234.123456789012345m],
                 ["1234.123456789012345"]
             ])
@@ -179,7 +127,7 @@ public class ExcelServiceTests
                     new() { Header = "Value", Type = ColumnType.Decimal }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [123.456],
                 [78.90]
             ])
@@ -205,7 +153,7 @@ public class ExcelServiceTests
                     new() { Header = "Score", Type = ColumnType.Percentage }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [85.5m],
                 [92.3m]
             ])
@@ -231,7 +179,7 @@ public class ExcelServiceTests
                     new() { Header = "Active", Type = ColumnType.Boolean }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [true],
                 [false]
             ])
@@ -255,7 +203,7 @@ public class ExcelServiceTests
                     new() { Header = "Date", Type = ColumnType.Date }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 ["2024-12-15T10:30:00"]
             ])
         };
@@ -279,7 +227,7 @@ public class ExcelServiceTests
                     new() { Header = "Data", Type = ColumnType.String }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [null],
                 ["ValidValue"]
             ])
@@ -303,7 +251,7 @@ public class ExcelServiceTests
                     new() { Header = "Date", Type = ColumnType.Date }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 ["not-a-date"]
             ])
         };
@@ -325,7 +273,7 @@ public class ExcelServiceTests
                     new() { Header = "Amount", Type = ColumnType.Money }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 ["not-a-number"]
             ])
         };
@@ -352,7 +300,7 @@ public class ExcelServiceTests
                     new() { Header = "Score", Type = ColumnType.Percentage }
                 ]
             },
-            Data = CreateTestData([
+            Data = Helpers.CreateTestData([
                 [
                     "John Doe",
                     30,
@@ -378,109 +326,5 @@ public class ExcelServiceTests
         Assert.That(worksheet.Cell(2, 3).Style.NumberFormat.Format, Is.EqualTo("€ #,##0.00"));
         Assert.That(worksheet.Cell(2, 5).Style.DateFormat.Format, Is.EqualTo("mm/dd/yyyy"));
         Assert.That(worksheet.Cell(2, 6).Style.NumberFormat.Format, Is.EqualTo("0.00%"));
-    }
-
-    [Test]
-    public void CreateExcel_WithMoreDataColumnsThanConfigColumns_HandlesExtraColumns()
-    {
-        var data = new FullExcelData
-        {
-            Config = new ExcelConfiguration
-            {
-                Columns = [
-                    new() { Header = "Name", Type = ColumnType.String },
-                    new() { Header = "Age", Type = ColumnType.Integer }
-                ]
-            },
-            Data = CreateTestData([
-                ["John", 30, "Extra Data"]
-            ])
-        };
-
-        var workbook = _service.CreateExcel(data);
-        var worksheet = workbook.Worksheet(1);
-
-        Assert.That(worksheet.Cell(2, 1).Value.ToString(), Is.EqualTo("John"));
-        Assert.That(worksheet.Cell(2, 2).Value, Is.EqualTo(30));
-        Assert.That(worksheet.Cell(2, 3).Value.ToString(), Is.EqualTo("Extra Data"));
-    }
-
-    [Test]
-    public void CreateExcel_WithEmptyData_CreatesWorkbookWithHeadersOnly()
-    {
-        var data = new FullExcelData
-        {
-            Config = new ExcelConfiguration
-            {
-                Columns = [
-                    new() { Header = "Name", Type = ColumnType.String },
-                    new() { Header = "Age", Type = ColumnType.Integer }
-                ]
-            },
-            Data = []
-        };
-
-        var workbook = _service.CreateExcel(data);
-        var worksheet = workbook.Worksheet(1);
-
-        Assert.That(worksheet.Cell(1, 1).Value.ToString(), Is.EqualTo("Name"));
-        Assert.That(worksheet.Cell(1, 2).Value.ToString(), Is.EqualTo("Age"));
-        Assert.That(worksheet.Cell(2, 1).IsEmpty(), Is.True);
-        Assert.That(worksheet.Cell(2, 2).IsEmpty(), Is.True);
-    }
-
-    [Test]
-    public void CreateExcel_SetsAutoFilter()
-    {
-        var data = new FullExcelData
-        {
-            Config = new ExcelConfiguration
-            {
-                Columns = [
-                    new() { Header = "Name", Type = ColumnType.String },
-                    new() { Header = "Age", Type = ColumnType.Integer }
-                ]
-            },
-            Data = CreateTestData([
-                ["John", 30]
-            ])
-        };
-
-        var workbook = _service.CreateExcel(data);
-        var worksheet = workbook.Worksheet(1);
-
-        Assert.That(worksheet.AutoFilter.IsEnabled, Is.True);
-        Assert.That(worksheet.AutoFilter.Range.RangeAddress.ToString(), Is.EqualTo("A1:B2"));
-    }
-
-    [Test]
-    public void CreateExcel_AdjustsColumnsToContents()
-    {
-        var data = new FullExcelData
-        {
-            Config = new ExcelConfiguration
-            {
-                Columns = [
-                    new() { Header = "Description", Type = ColumnType.String }
-                ]
-            },
-            Data = CreateTestData([
-                ["This is a very long text that should cause the column to be adjusted"]
-            ])
-        };
-
-        var workbook = _service.CreateExcel(data);
-        var worksheet = workbook.Worksheet(1);
-
-        double width = worksheet.Column(1).Width;
-        Assert.That(width, Is.GreaterThan(15.0));
-    }
-
-    private static JsonElement[][] CreateTestData(object?[][] rawData)
-    {
-        var jsonDoc = JsonSerializer.SerializeToDocument(rawData);
-        return rawData.Select((row, i) =>
-            row.Select((cell, j) => jsonDoc.RootElement[i][j]).ToArray()
-        ).ToArray();
     }
 }

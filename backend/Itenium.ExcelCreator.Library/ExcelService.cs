@@ -12,57 +12,114 @@ public class ExcelService
         var wb = new XLWorkbook();
         var ws = wb.AddWorksheet(data.Config.SheetName);
 
-        int cols = data.Config.Columns.Length;
-
-        if (data.Config.Columns.Length > 0)
+        for (int i = 0; i < data.Config.Columns.Length; i++)
         {
-            for (int i = 0; i < data.Config.Columns.Length; i++)
-            {
-                var cell = ws.Cell(1, i + 1);
-                cell.Value = data.Config.Columns[i].Header;
-                cell.Style.Font.Bold = true;
-                cell.Style.Fill.BackgroundColor = XLColor.LightGray;
-            }
+            var cell = ws.Cell(1, i + 1);
+            cell.Value = data.Config.Columns[i].Header;
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = XLColor.LightGray;
         }
 
         for (int rowIndex = 0; rowIndex < data.Data.Length; rowIndex++)
         {
             var row = data.Data[rowIndex];
-            for (int colIndex = 0; colIndex < row.Length; colIndex++)
+            for (int colIndex = 0; colIndex < Math.Max(row.Length, data.Config.Columns.Length); colIndex++)
             {
                 var cell = ws.Cell(rowIndex + 2, colIndex + 1);
-                var value = row[colIndex];
 
-                // Apply formatting based on column type
                 if (colIndex < data.Config.Columns.Length)
                 {
                     var columnConfig = data.Config.Columns[colIndex];
-                    FormatCellBasedOnType(cell, value, columnConfig.Type);
+                    FormatCell(cell, columnConfig.Type);
+
+                    if (colIndex < row.Length)
+                    {
+                        var value = row[colIndex];
+                        SetCellValue(cell, value, columnConfig);
+                    }
+                    else
+                    {
+                        // No data for this column, but we have column configuration
+                        // Handle formula columns or set empty value
+                        if (!string.IsNullOrWhiteSpace(columnConfig.Formula))
+                        {
+                            string formula = columnConfig.Formula.Replace("{row}", cell.Address.RowNumber.ToString());
+                            cell.FormulaA1 = formula;
+                        }
+                        else
+                        {
+                            cell.Value = "";
+                        }
+                    }
                 }
                 else
                 {
-                    // Default formatting
+                    // More data columns than config columns
+                    var value = row[colIndex];
                     cell.Value = GetStringValue(value);
                 }
             }
         }
 
         int lastRow = data.Data.Length + 1;
+        int cols = data.Config.Columns.Length;
         ws.Range(1, 1, lastRow, cols).SetAutoFilter();
 
         ws.ColumnsUsed().AdjustToContents();
         return wb;
     }
 
-    private static void FormatCellBasedOnType(IXLCell cell, JsonElement value, ColumnType columnType)
+    private static void FormatCell(IXLCell cell, ColumnType columnType)
     {
+        switch (columnType)
+        {
+            case ColumnType.String:
+                break;
+
+            case ColumnType.Date:
+                cell.Style.DateFormat.Format = "mm/dd/yyyy";
+                break;
+
+            case ColumnType.Percentage:
+                cell.Style.NumberFormat.Format = "0.00%";
+                break;
+
+            case ColumnType.Integer:
+                cell.Style.NumberFormat.Format = "#,##0";
+                break;
+
+            case ColumnType.Money:
+                cell.Style.NumberFormat.Format = "€ #,##0.00";
+                break;
+
+            case ColumnType.Decimal:
+                cell.Style.NumberFormat.Format = "#,##0.00";
+                break;
+
+            case ColumnType.Boolean:
+                break;
+
+            default:
+                throw new NotImplementedException($"Still have to implement ColumnType.{columnType}!");
+        }
+    }
+
+    private static void SetCellValue(IXLCell cell, JsonElement value, ColumnConfiguration column)
+    {
+        if (!string.IsNullOrWhiteSpace(column.Formula))
+        {
+            string formula = column.Formula.Replace("{row}", cell.Address.RowNumber.ToString());
+            cell.FormulaA1 = formula;
+            return;
+        }
+
         if (value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
         {
             cell.Value = "";
             return;
         }
 
-        switch (columnType)
+        switch (column.Type)
         {
             case ColumnType.String:
                 cell.Value = GetStringValue(value);
@@ -72,7 +129,6 @@ public class ExcelService
                 if (TryGetDateValue(value, out DateTime dateValue))
                 {
                     cell.Value = dateValue;
-                    cell.Style.DateFormat.Format = "mm/dd/yyyy";
                 }
                 else
                 {
@@ -84,7 +140,6 @@ public class ExcelService
                 if (TryGetDecimalValue(value, out decimal percentValue))
                 {
                     cell.Value = percentValue / 100;
-                    cell.Style.NumberFormat.Format = "0.00%";
                 }
                 else
                 {
@@ -96,7 +151,6 @@ public class ExcelService
                 if (TryGetIntegerValue(value, out int intValue))
                 {
                     cell.Value = intValue;
-                    cell.Style.NumberFormat.Format = "#,##0";
                 }
                 else
                 {
@@ -108,7 +162,6 @@ public class ExcelService
                 if (TryGetDecimalValue(value, out decimal currencyValue))
                 {
                     cell.Value = currencyValue;
-                    cell.Style.NumberFormat.Format = "€ #,##0.00";
                 }
                 else
                 {
@@ -120,7 +173,6 @@ public class ExcelService
                 if (TryGetDecimalValue(value, out decimal decimalValue))
                 {
                     cell.Value = decimalValue;
-                    cell.Style.NumberFormat.Format = "#,##0.00";
                 }
                 else
                 {
@@ -138,8 +190,7 @@ public class ExcelService
                 break;
 
             default:
-                cell.Value = GetStringValue(value);
-                break;
+                throw new NotImplementedException($"Still have to implement ColumnType.{column.Type}!");
         }
     }
 
