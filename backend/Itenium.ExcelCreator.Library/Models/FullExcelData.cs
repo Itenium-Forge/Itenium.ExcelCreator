@@ -10,6 +10,8 @@ public class FullExcelData
 {
     public JsonElement[][] Data { get; set; } = [];
     public ExcelConfiguration Config { get; set; } = new();
+
+    public override string ToString() => $"Rows={Data.Length}, Config={Config}";
 }
 
 public class ExcelConfiguration
@@ -17,6 +19,8 @@ public class ExcelConfiguration
     public string FileName { get; set; } = "";
     public string SheetName { get; set; } = "Sheet1";
     public ColumnConfiguration[] Columns { get; set; } = [];
+
+    public override string ToString() => $"{SheetName}: {string.Join(", ", Columns.Select(x => x.Header))}";
 }
 
 public class ColumnConfiguration
@@ -32,6 +36,8 @@ public class ColumnConfiguration
     /// Example: "=A{row}+B{row}".
     /// </summary>
     public string? Formula { get; set; }
+
+    public override string ToString() => $"{Header}: Type={Type}, Formula={Formula?.TrimStart('=')}";
 }
 
 /// <summary>

@@ -27,36 +27,29 @@ public class ExcelService
             {
                 var cell = ws.Cell(rowIndex + 2, colIndex + 1);
 
+                ColumnConfiguration? columnConfig = null;
                 if (colIndex < data.Config.Columns.Length)
                 {
-                    var columnConfig = data.Config.Columns[colIndex];
+                    columnConfig = data.Config.Columns[colIndex];
                     FormatCell(cell, columnConfig.Type);
+                }
 
-                    if (colIndex < row.Length)
+                if (!string.IsNullOrWhiteSpace(columnConfig?.Formula))
+                {
+                    string formula = columnConfig.Formula.Replace("{row}", cell.Address.RowNumber.ToString());
+                    cell.FormulaA1 = formula;
+                }
+                else if (colIndex < row.Length)
+                {
+                    var value = row[colIndex];
+                    if (columnConfig == null)
                     {
-                        var value = row[colIndex];
-                        SetCellValue(cell, value, columnConfig);
+                        cell.Value = GetStringValue(value);
                     }
                     else
                     {
-                        // No data for this column, but we have column configuration
-                        // Handle formula columns or set empty value
-                        if (!string.IsNullOrWhiteSpace(columnConfig.Formula))
-                        {
-                            string formula = columnConfig.Formula.Replace("{row}", cell.Address.RowNumber.ToString());
-                            cell.FormulaA1 = formula;
-                        }
-                        else
-                        {
-                            cell.Value = "";
-                        }
+                        SetCellValue(cell, value, columnConfig);
                     }
-                }
-                else
-                {
-                    // More data columns than config columns
-                    var value = row[colIndex];
-                    cell.Value = GetStringValue(value);
                 }
             }
         }
@@ -106,13 +99,6 @@ public class ExcelService
 
     private static void SetCellValue(IXLCell cell, JsonElement value, ColumnConfiguration column)
     {
-        if (!string.IsNullOrWhiteSpace(column.Formula))
-        {
-            string formula = column.Formula.Replace("{row}", cell.Address.RowNumber.ToString());
-            cell.FormulaA1 = formula;
-            return;
-        }
-
         if (value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
         {
             cell.Value = "";

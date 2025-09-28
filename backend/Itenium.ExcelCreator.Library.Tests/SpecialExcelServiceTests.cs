@@ -85,6 +85,28 @@ public class SpecialExcelServiceTests
         var workbook = _service.CreateExcel(data);
         var worksheet = workbook.Worksheet(1);
 
-        Assert.That(worksheet.Cell(2, 3).Value, Is.EqualTo(20));
+        Assert.That(worksheet.Cell(2, 1).Value, Is.EqualTo(20));
+    }
+
+    [Test]
+    public void Formula_WithDataValue()
+    {
+        var data = new FullExcelData
+        {
+            Config = new ExcelConfiguration
+            {
+                Columns = [
+                    new() { Header = "Sum", Type = ColumnType.Integer, Formula = "=10+10"},
+                ]
+            },
+            Data = Helpers.CreateTestData([
+                [200],
+            ])
+        };
+
+        var workbook = _service.CreateExcel(data);
+        var worksheet = workbook.Worksheet(1);
+
+        Assert.That(worksheet.Cell(2, 1).Value, Is.EqualTo(20));
     }
 }
