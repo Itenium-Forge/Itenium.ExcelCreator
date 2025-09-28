@@ -38,6 +38,13 @@ public class ExcelService
                 {
                     string formula = columnConfig.Formula.Replace("{row}", cell.Address.RowNumber.ToString());
                     cell.FormulaA1 = formula;
+                    
+                    if (colIndex < row.Length && 
+                        row[colIndex].ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined)
+                    {
+                        cell.Style.Fill.BackgroundColor = XLColor.Red;
+                        cell.CreateComment().AddText($"ERR: Both formula ({formula}) and data ({row[colIndex].ToString()})");
+                    }
                 }
                 else if (colIndex < row.Length)
                 {

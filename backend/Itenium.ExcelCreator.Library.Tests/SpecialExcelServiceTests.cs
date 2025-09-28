@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using Itenium.ExcelCreator.Library.Models;
 
 namespace Itenium.ExcelCreator.Library.Tests;
@@ -108,5 +109,10 @@ public class SpecialExcelServiceTests
         var worksheet = workbook.Worksheet(1);
 
         Assert.That(worksheet.Cell(2, 1).Value, Is.EqualTo(20));
+        Assert.That(worksheet.Cell(2, 1).Style.Fill.BackgroundColor, Is.EqualTo(XLColor.Red));
+        Assert.That(worksheet.Cell(2, 1).HasComment, Is.True);
+
+        var comment = worksheet.Cell(2, 1).GetComment();
+        Assert.That(comment.Text, Does.Contain("Both formula").And.Contain("and data"));
     }
 }
