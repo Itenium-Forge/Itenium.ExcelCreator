@@ -70,6 +70,8 @@ public class ExcelService
             ws.SheetView.FreezeColumns(data.Config.FreezeColumns.Value);
         }
 
+        wb.RecalculateAllFormulas();
+
         ws.ColumnsUsed().AdjustToContents();
         return wb;
     }
