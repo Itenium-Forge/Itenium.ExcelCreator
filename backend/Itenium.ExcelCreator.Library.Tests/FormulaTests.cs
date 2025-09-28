@@ -3,7 +3,7 @@ using Itenium.ExcelCreator.Library.Models;
 
 namespace Itenium.ExcelCreator.Library.Tests;
 
-public class SpecialExcelServiceTests
+public class FormulaTests
 {
     private ExcelService _service;
 

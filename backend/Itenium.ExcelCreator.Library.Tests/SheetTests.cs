@@ -3,7 +3,7 @@ using ClosedXML.Excel;
 
 namespace Itenium.ExcelCreator.Library.Tests;
 
-public class GeneralExcelServiceTests
+public class SheetTests
 {
     private ExcelService _service;
 
@@ -14,7 +14,7 @@ public class GeneralExcelServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithBasicConfiguration_CreatesWorkbookWithCorrectSheetName()
+    public void CreateWorkbookWithCorrectSheetName()
     {
         var data = new FullExcelData
         {
@@ -31,7 +31,7 @@ public class GeneralExcelServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithHeaders_CreatesCorrectHeaders()
+    public void Headers_AreBoldAndColored()
     {
         var data = new FullExcelData
         {
@@ -64,7 +64,7 @@ public class GeneralExcelServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithMoreDataColumnsThanConfigColumns_HandlesExtraColumns()
+    public void MoreDataColumnsThanConfigColumns_HandlesExtraColumns_AsStrings()
     {
         var data = new FullExcelData
         {
@@ -89,7 +89,7 @@ public class GeneralExcelServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithEmptyData_CreatesWorkbookWithHeadersOnly()
+    public void NoData_CreatesWorkbookWithHeadersOnly()
     {
         var data = new FullExcelData
         {
@@ -113,7 +113,7 @@ public class GeneralExcelServiceTests
     }
 
     [Test]
-    public void CreateExcel_SetsAutoFilter()
+    public void SetsAutoFilter()
     {
         var data = new FullExcelData
         {
@@ -137,7 +137,7 @@ public class GeneralExcelServiceTests
     }
 
     [Test]
-    public void CreateExcel_AdjustsColumnsToContents()
+    public void AdjustsColumnsToContents()
     {
         var data = new FullExcelData
         {

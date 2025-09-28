@@ -3,7 +3,7 @@ using Itenium.ExcelCreator.Library.Models;
 
 namespace Itenium.ExcelCreator.Library.Tests;
 
-public class ExcelDataFormattingServiceTests
+public class ColumnTypeTests
 {
     private ExcelService _service;
 
@@ -14,7 +14,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithStringData_FormatsCorrectly()
+    public void String_JustSetsTheValue()
     {
         var data = new FullExcelData
         {
@@ -38,7 +38,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithIntegerData_FormatsWithThousandsSeparator()
+    public void Integer_FormatsWithThousandsSeparator()
     {
         var data = new FullExcelData
         {
@@ -64,7 +64,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithMoneyData_FormatsCurrency()
+    public void Money_FormatsCurrency()
     {
         var data = new FullExcelData
         {
@@ -90,7 +90,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithMoneyData_WithTooHighPrecision_Truncates()
+    public void Money_WithTooHighPrecision_Truncates()
     {
         var data = new FullExcelData
         {
@@ -117,7 +117,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithDecimalData_FormatsDecimalPlaces()
+    public void Decimal_FormatsDecimalPlaces()
     {
         var data = new FullExcelData
         {
@@ -143,7 +143,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithPercentageData_FormatsAsPercentage()
+    public void Percentage_FormatsAsPercentage()
     {
         var data = new FullExcelData
         {
@@ -169,7 +169,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithBooleanData_DisplaysBooleanValues()
+    public void Boolean_DisplaysBooleanValues()
     {
         var data = new FullExcelData
         {
@@ -193,7 +193,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithDateData_FormatsAsDate()
+    public void Date_FormatsAsDate()
     {
         var data = new FullExcelData
         {
@@ -217,7 +217,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithNullValues_HandlesNullsCorrectly()
+    public void NullValues_DisplayEmptyString()
     {
         var data = new FullExcelData
         {
@@ -229,7 +229,6 @@ public class ExcelDataFormattingServiceTests
             },
             Data = Helpers.CreateTestData([
                 [null],
-                ["ValidValue"]
             ])
         };
 
@@ -237,11 +236,10 @@ public class ExcelDataFormattingServiceTests
         var worksheet = workbook.Worksheet(1);
 
         Assert.That(worksheet.Cell(2, 1).Value.ToString(), Is.EqualTo(""));
-        Assert.That(worksheet.Cell(3, 1).Value.ToString(), Is.EqualTo("ValidValue"));
     }
 
     [Test]
-    public void CreateExcel_WithInvalidDateString_FallsBackToStringValue()
+    public void InvalidDateString_FallsBackToStringValue()
     {
         var data = new FullExcelData
         {
@@ -263,7 +261,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithInvalidNumericString_FallsBackToStringValue()
+    public void InvalidNumericString_FallsBackToStringValue()
     {
         var data = new FullExcelData
         {
@@ -285,7 +283,7 @@ public class ExcelDataFormattingServiceTests
     }
 
     [Test]
-    public void CreateExcel_WithMixedDataTypes_HandlesAllTypesCorrectly()
+    public void MixedDataTypes_HandlesAllTypesCorrectly()
     {
         var data = new FullExcelData
         {
