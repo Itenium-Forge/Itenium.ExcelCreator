@@ -84,7 +84,7 @@ public class ExcelService
                 break;
 
             case ColumnType.Date:
-                cell.Style.DateFormat.Format = "mm/dd/yyyy";
+                cell.Style.DateFormat.Format = "dd/mm/yyyy";
                 break;
 
             case ColumnType.Percentage:
