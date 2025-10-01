@@ -84,6 +84,7 @@ public class ExcelService
                 break;
 
             case ColumnType.Date:
+                // cell.Style.DateFormat.NumberFormatId = (int)XLPredefinedFormat.DateTime.DayMonthYear4WithSlashes;
                 cell.Style.DateFormat.Format = "dd/mm/yyyy";
                 break;
 
@@ -92,6 +93,7 @@ public class ExcelService
                 break;
 
             case ColumnType.Integer:
+                // cell.Style.NumberFormat.NumberFormatId = (int)XLPredefinedFormat.Number.Precision2WithSeparator;
                 cell.Style.NumberFormat.Format = "#,##0";
                 break;
 
