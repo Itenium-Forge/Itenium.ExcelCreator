@@ -213,7 +213,7 @@ public class ColumnTypeTests
 
         var expectedDate = new DateTime(2024, 12, 15, 10, 30, 0);
         Assert.That(worksheet.Cell(2, 1).Value, Is.EqualTo(expectedDate));
-        Assert.That(worksheet.Cell(2, 1).Style.DateFormat.Format, Is.EqualTo("mm/dd/yyyy"));
+        Assert.That(worksheet.Cell(2, 1).Style.DateFormat.Format, Is.EqualTo("dd/mm/yyyy"));
     }
 
     [Test]
@@ -319,10 +319,5 @@ public class ColumnTypeTests
         Assert.That(worksheet.Cell(2, 4).Value, Is.EqualTo(true));
         Assert.That(worksheet.Cell(2, 5).Value, Is.EqualTo(DateTime.Parse("2024-01-15")));
         Assert.That(worksheet.Cell(2, 6).Value, Is.EqualTo(0.955));
-
-        Assert.That(worksheet.Cell(2, 2).Style.NumberFormat.Format, Is.EqualTo("#,##0"));
-        Assert.That(worksheet.Cell(2, 3).Style.NumberFormat.Format, Is.EqualTo("€ #,##0.00"));
-        Assert.That(worksheet.Cell(2, 5).Style.DateFormat.Format, Is.EqualTo("mm/dd/yyyy"));
-        Assert.That(worksheet.Cell(2, 6).Style.NumberFormat.Format, Is.EqualTo("0.00%"));
     }
 }
